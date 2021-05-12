@@ -11,6 +11,32 @@ public class EventRegisterImpl implements EventRegister {
 
     public void createTables() throws SQLException {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        PreparedStatement preparedStatement =
+                connection.prepareStatement("create table IF NOT EXISTS events " +
+                "(\n" +
+                "    event_id    serial  not null\n" +
+                "        constraint event_pk\n" +
+                "            primary key,\n" +
+                "    location_id integer not null,\n" +
+                "    period_id   integer not null\n" +
+                ");\n" +
+                "\n" +
+                "alter table events\n" +
+                "    owner to postgres;\n");
+        preparedStatement.execute();
+        PreparedStatement prepareStatement = connection.prepareStatement("create table IF NOT EXISTS periods" +
+                "(\n" +
+                "    id         serial not null\n" +
+                "        constraint period_pk\n" +
+                "            primary key,\n" +
+                "    start_date date   not null,\n" +
+                "    end_date   date   not null\n" +
+                ");\n" +
+                "\n" +
+                "alter table periods\n" +
+                "    owner to postgres;\n");
+        prepareStatement.execute();
+
     }
 
     public Integer addPeriodAndGetID(Date dateBegin, Date dateEnd) throws SQLException {
