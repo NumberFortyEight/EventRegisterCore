@@ -7,21 +7,15 @@ import java.util.List;
 
 public class SqlEventRegisterImpl implements sqlEventRegister {
 
-    public Integer addPeriodAndGetID(Connection connection, Date dateBegin, Date dateEnd) throws SQLException {
+    public Integer addPeriodAndGetID(Connection connection, Date startDate, Date endDate) throws SQLException {
         String sql = "INSERT INTO periods (start_date, end_date) Values (?,?)";
         PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        preparedStatement.setTimestamp(1, new Timestamp(dateBegin.getTime()));
-        preparedStatement.setTimestamp(2, new Timestamp(dateEnd.getTime()));
+        preparedStatement.setTimestamp(1, new Timestamp(startDate.getTime()));
+        preparedStatement.setTimestamp(2, new Timestamp(endDate.getTime()));
         preparedStatement.executeUpdate();
         ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-        connection.close();
         generatedKeys.next();
         return generatedKeys.getInt(1);
-    }
-
-    @Override
-    public Integer createPeriodAndGetID(Connection connection, Date startDate, Date endDate) {
-        return null;
     }
 
     @Override
@@ -32,7 +26,6 @@ public class SqlEventRegisterImpl implements sqlEventRegister {
         preparedStatement.setInt(2, periodID);
         preparedStatement.executeUpdate();
         ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-        connection.close();
         generatedKeys.next();
         return generatedKeys.getInt(1);
     }
@@ -48,7 +41,6 @@ public class SqlEventRegisterImpl implements sqlEventRegister {
             Period period = new Period(resultSet.getInt("id"), new Date(start_date.getTime()), new Date(end_date.getTime()));
             periodList.add(period);
         }
-        connection.close();
         return periodList;
     }
 

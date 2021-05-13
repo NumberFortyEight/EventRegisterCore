@@ -19,17 +19,16 @@ public class EventCheckServiceImpl implements EventCheckService {
     }
 
     @Override
-    public boolean isEventExist(Connection connection, int locationID, Date dateBegin, Date dateEnd) {
-        return false;
+    public boolean isEventExist(Connection connection, Integer eventID) throws SQLException {
+        String sql = "SELECT * FROM events WHERE event_id = ?;";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, eventID);
+        preparedStatement.executeQuery();
+        return !(preparedStatement.getResultSet() == null);
     }
 
     @Override
-    public boolean isEventExist(Connection connection, int locationID, int periodID) {
-        return false;
-    }
-
-    @Override
-    public boolean isPeriodExist(Connection connection, int periodID) {
-        return false;
+    public boolean isUserRegistered(Connection connection, Integer userID, Integer EventID) {
+        String sql = "SELECT * FROM events WHERE event_id = ?;";
     }
 }
