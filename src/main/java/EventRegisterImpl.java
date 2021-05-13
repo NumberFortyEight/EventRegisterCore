@@ -16,10 +16,11 @@ public class EventRegisterImpl implements EventRegister{
     private final String USER;
     private final String PASSWORD;
 
-    public EventRegisterImpl(String DB_URL, String USER, String PASSWORD) {
+    public EventRegisterImpl(String DB_URL, String USER, String PASSWORD) throws SQLException {
         this.DB_URL = DB_URL;
         this.USER = USER;
         this.PASSWORD = PASSWORD;
+        createAllTables();
     }
 
     @Override
@@ -54,9 +55,6 @@ public class EventRegisterImpl implements EventRegister{
             connection.close();
             return userIsRegistered;
         } else {
-            // FIXME: 13.05.2021 exception
-            System.out.println("event is not exist");
-            connection.close();
             return false;
         }
     }
@@ -69,11 +67,17 @@ public class EventRegisterImpl implements EventRegister{
             connection.close();
             return userRegistered;
         } else {
-            // FIXME: 13.05.2021 exception
-            System.out.println("event is not exist");
             connection.close();
             return false;
         }
+    }
+
+    @Override
+    public boolean isUserCanEnter(Integer userID, Integer eventID, Date entryTime) throws SQLException {
+        Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        boolean isUserCanEnter = checkService.isUserCanEnter(connection, userID, eventID, entryTime);
+        connection.close();
+        return isUserCanEnter;
     }
 
     @Override
@@ -101,6 +105,32 @@ public class EventRegisterImpl implements EventRegister{
     public void activateUser(Integer userID) throws SQLException {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
         SQLRegisterService.setEventActive(connection, userID, true);
+        connection.close();
+    }
+
+    private void createAllTables() throws SQLException {
+        Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        connection.prepareStatement("create table if not exists events (" +
+                "    event_id    serial  not null " +
+                "        constraint event_pk " +
+                "            primary key, " +
+                "    location_id integer not null, " +
+                "    period_id   integer not null );" +
+                "alter table events " +
+                "    owner to postgres; ").execute();
+        connection.prepareStatement("create table if not exists passlist (" +
+                "    user_id         integer not null, " +
+                "    event_id        integer not null, " +
+                "    is_user_active  boolean, " +
+                "    is_event_active boolean ); " +
+                "alter table passlist " +
+                "    owner to postgres; ").execute();
+        connection.prepareStatement("create table if not exists periods (" +
+                "    period_id  serial    not null, " +
+                "    start_date timestamp not null, " +
+                "    end_date   timestamp not null );" +
+                "alter table periods " +
+                "    owner to postgres;").execute();
         connection.close();
     }
 }

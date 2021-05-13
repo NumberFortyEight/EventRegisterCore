@@ -1,7 +1,9 @@
 package services;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class CheckServiceImpl implements CheckService {
 
@@ -36,5 +38,23 @@ public class CheckServiceImpl implements CheckService {
         preparedStatement.setInt(2, eventID);
         preparedStatement.executeQuery();
         return preparedStatement.getResultSet().next();
+    }
+
+    @Override
+    public boolean isUserCanEnter(Connection connection, Integer userID, Integer eventID, Date entryTime) throws SQLException {
+        if (isUserRegistered(connection, userID, eventID)) {
+            String sql = "SELECT start_date, end_date FROM periods INNER JOIN events ON event_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, eventID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                Date startDate = new Date(resultSet.getDate("start_date").getTime());
+                Date endDate = new Date(resultSet.getDate("end_date").getTime());
+                return entryTime.after(startDate) && endDate.before(endDate);
+            } else return false;
+        } else {
+            return false;
+        }
     }
 }

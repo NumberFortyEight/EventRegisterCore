@@ -7,6 +7,7 @@ public interface EventRegister {
     Integer addEventAndGetID(int locationID, int periodID) throws SQLException;
     boolean addUserToEvent(Integer userID, Integer EventID) throws SQLException;
     boolean isUserRegistered(Integer userID, Integer EventID) throws SQLException;
+    boolean isUserCanEnter(Integer userID, Integer EventID, Date entryTime) throws SQLException;
     void disableEvent(Integer eventID) throws SQLException;
     void disableUser(Integer userID) throws SQLException;
     void activateEvent(Integer eventID) throws SQLException;
