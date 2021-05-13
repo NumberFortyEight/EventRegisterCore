@@ -4,10 +4,10 @@ import java.sql.SQLException;
 import java.util.Date;
 
 public interface EventRegister {
-    Integer registerEventAndGetID(int locationID, Date dateBegin, Date dateEnd) throws SQLException;
-    Integer registerEventAndGetID(int locationID, int periodID) throws SQLException;
-    boolean registerUserToEvent(Integer userID, Integer EventID) throws SQLException;
-    boolean isUserRegistered(Integer userID, Integer EventID);
-    void disableEvent(Integer eventID);
+    Integer addEventAndGetID(int locationID, Date dateBegin, Date dateEnd) throws SQLException;
+    Integer addEventAndGetID(int locationID, int periodID) throws SQLException;
+    boolean addUserToEvent(Integer userID, Integer EventID) throws SQLException;
+    boolean isUserRegistered(Integer userID, Integer EventID) throws SQLException;
+    void disableEvent(Integer eventID) throws SQLException;
     void disableUser(Integer userID);
 }

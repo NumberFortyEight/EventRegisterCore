@@ -1,11 +1,7 @@
-import entity.Period;
-
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-public class SqlEventRegisterImpl implements sqlEventRegister {
+public class SQLRegisterServiceImpl implements SQLRegisterService {
 
     public Integer addPeriodAndGetID(Connection connection, Date startDate, Date endDate) throws SQLException {
         String sql = "INSERT INTO periods (start_date, end_date) Values (?,?)";
@@ -30,38 +26,24 @@ public class SqlEventRegisterImpl implements sqlEventRegister {
         return generatedKeys.getInt(1);
     }
 
-    public List<Period> getAllPeriods(Connection connection) throws SQLException {
-        String sql = "SELECT * FROM periods;";
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        List<Period> periodList = new ArrayList<>();
-        while (resultSet.next()) {
-            Timestamp start_date = resultSet.getTimestamp("start_date");
-            Timestamp end_date = resultSet.getTimestamp("end_date");
-            Period period = new Period(resultSet.getInt("id"), new Date(start_date.getTime()), new Date(end_date.getTime()));
-            periodList.add(period);
-        }
-        return periodList;
-    }
-
     @Override
     public boolean registerUserToEvent(Connection connection, Integer userID, Integer eventID) throws SQLException {
-        String sql = "INSERT INTO passlist (user_id, event_id) VALUES (?,?)";
-        PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        String sql = "INSERT INTO passlist (user_id, event_id, is_user_active, is_event_active ) VALUES (?,?,?,?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setInt(1, userID);
         preparedStatement.setInt(2, eventID);
+        preparedStatement.setBoolean(3, true);
+        preparedStatement.setBoolean(4, true);
         preparedStatement.execute();
         return true;
     }
 
     @Override
-    public boolean isUserRegistered(Connection connection, Integer userID, Integer EventID) {
-        return false;
-    }
-
-    @Override
-    public void disableEvent(Connection connection, Integer eventID) {
-
+    public void disableEvent(Connection connection, Integer eventID) throws SQLException {
+        String sql = "UPDATE passlist SET is_event_active = false WHERE event_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, eventID);
+        preparedStatement.execute();
     }
 
     @Override
