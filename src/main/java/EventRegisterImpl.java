@@ -12,9 +12,15 @@ public class EventRegisterImpl implements EventRegister{
     private final CheckService checkService = new CheckServiceImpl();
     private final services.SQLRegisterService SQLRegisterService = new SQLRegisterServiceImpl();
 
-    public static final String DB_URL = "jdbc:postgresql://localhost:5432/postgres";
-    public static final String USER = "postgres";
-    public static final String PASSWORD = "root";
+    private final String DB_URL;
+    private final String USER;
+    private final String PASSWORD;
+
+    public EventRegisterImpl(String DB_URL, String USER, String PASSWORD) {
+        this.DB_URL = DB_URL;
+        this.USER = USER;
+        this.PASSWORD = PASSWORD;
+    }
 
     @Override
     public Integer addEventAndGetID(int locationID, int periodID) throws SQLException {
@@ -73,24 +79,28 @@ public class EventRegisterImpl implements EventRegister{
     @Override
     public void disableEvent(Integer eventID) throws SQLException {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-        SQLRegisterService.disableEvent(connection, eventID);
+        SQLRegisterService.setEventActive(connection, eventID, false);
         connection.close();
     }
 
     @Override
     public void disableUser(Integer userID) throws SQLException {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-        SQLRegisterService.disableUser(connection, userID);
+        SQLRegisterService.setEventActive(connection, userID, false);
         connection.close();
     }
 
     @Override
     public void activateEvent(Integer eventID) throws SQLException {
-
+        Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        SQLRegisterService.setEventActive(connection, eventID, true);
+        connection.close();
     }
 
     @Override
     public void activateUser(Integer userID) throws SQLException {
-
+        Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        SQLRegisterService.setEventActive(connection, userID, true);
+        connection.close();
     }
 }

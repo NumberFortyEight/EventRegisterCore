@@ -41,18 +41,20 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
     }
 
     @Override
-    public void disableEvent(Connection connection, Integer eventID) throws SQLException {
-        String sql = "UPDATE passlist SET is_event_active = false WHERE event_id = ?";
+    public void setEventActive(Connection connection, Integer eventID, boolean active) throws SQLException {
+        String sql = "UPDATE passlist SET is_event_active = ? WHERE event_id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setInt(1, eventID);
+        preparedStatement.setBoolean(1, active);
+        preparedStatement.setInt(2, eventID);
         preparedStatement.execute();
     }
 
     @Override
-    public void disableUser(Connection connection, Integer userID) throws SQLException {
-        String sql = "UPDATE passlist SET is_user_active = false WHERE user_id = ?";
+    public void setUserActive(Connection connection, Integer userID, boolean active) throws SQLException {
+        String sql = "UPDATE passlist SET is_user_active = ? WHERE user_id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setInt(1, userID);
+        preparedStatement.setBoolean(1, active);
+        preparedStatement.setInt(2, userID);
         preparedStatement.execute();
     }
 }
