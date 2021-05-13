@@ -1,3 +1,7 @@
+import services.CheckService;
+import services.CheckServiceImpl;
+import services.SQLRegisterServiceImpl;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -6,7 +10,7 @@ import java.util.Date;
 public class EventRegisterImpl implements EventRegister{
 
     private final CheckService checkService = new CheckServiceImpl();
-    private final SQLRegisterService SQLRegisterService = new SQLRegisterServiceImpl();
+    private final services.SQLRegisterService SQLRegisterService = new SQLRegisterServiceImpl();
 
     public static final String DB_URL = "jdbc:postgresql://localhost:5432/postgres";
     public static final String USER = "postgres";
@@ -74,7 +78,19 @@ public class EventRegisterImpl implements EventRegister{
     }
 
     @Override
-    public void disableUser(Integer userID) {
+    public void disableUser(Integer userID) throws SQLException {
+        Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        SQLRegisterService.disableUser(connection, userID);
+        connection.close();
+    }
+
+    @Override
+    public void activateEvent(Integer eventID) throws SQLException {
+
+    }
+
+    @Override
+    public void activateUser(Integer userID) throws SQLException {
 
     }
 }

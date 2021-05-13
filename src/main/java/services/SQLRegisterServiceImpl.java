@@ -1,3 +1,5 @@
+package services;
+
 import java.sql.*;
 import java.util.Date;
 
@@ -47,7 +49,10 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
     }
 
     @Override
-    public void disableUser(Connection connection, Integer userID) {
-
+    public void disableUser(Connection connection, Integer userID) throws SQLException {
+        String sql = "UPDATE passlist SET is_user_active = false WHERE user_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, userID);
+        preparedStatement.execute();
     }
 }

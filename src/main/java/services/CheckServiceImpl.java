@@ -1,3 +1,5 @@
+package services;
+
 import java.sql.*;
 import java.util.Date;
 
@@ -11,11 +13,10 @@ public class CheckServiceImpl implements CheckService {
         preparedStatement.setTimestamp(2, new Timestamp(dateEnd.getTime()));
         preparedStatement.executeQuery();
         ResultSet resultSet = preparedStatement.getResultSet();
-        if (resultSet == null) {
-            return null;
+        if (resultSet.next()) {
+            return resultSet.getInt("period_id");
         }
-        resultSet.next();
-        return resultSet.getInt(1);
+        return null;
     }
 
     @Override
@@ -24,7 +25,7 @@ public class CheckServiceImpl implements CheckService {
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setInt(1, eventID);
         preparedStatement.executeQuery();
-        return !(preparedStatement.getResultSet() == null);
+        return preparedStatement.getResultSet().next();
     }
 
     @Override
@@ -34,6 +35,6 @@ public class CheckServiceImpl implements CheckService {
         preparedStatement.setInt(1, userID);
         preparedStatement.setInt(2, eventID);
         preparedStatement.executeQuery();
-        return !(preparedStatement.getResultSet() == null);
+        return preparedStatement.getResultSet().next();
     }
 }

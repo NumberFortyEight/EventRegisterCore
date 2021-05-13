@@ -9,5 +9,7 @@ public interface EventRegister {
     boolean addUserToEvent(Integer userID, Integer EventID) throws SQLException;
     boolean isUserRegistered(Integer userID, Integer EventID) throws SQLException;
     void disableEvent(Integer eventID) throws SQLException;
-    void disableUser(Integer userID);
+    void disableUser(Integer userID) throws SQLException;
+    void activateEvent(Integer eventID) throws SQLException;
+    void activateUser(Integer userID) throws SQLException;
 }
