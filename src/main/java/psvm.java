@@ -1,15 +1,17 @@
 
-import java.sql.SQLException;
-import java.util.Date;
+import java.time.Instant;
 
 public class psvm {
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args){
 
         EventRegister eventRegister =
                 new EventRegisterImpl("jdbc:postgresql://localhost:5432/mainBase", "postgres", "root");
-        eventRegister.addUserToEvent(170, 3);
-        boolean userCanEnter = eventRegister.isUserCanEnter(170, 3, new Date(2099));
-        System.out.println(userCanEnter);
+        Instant instant = Instant.parse("2005-09-18T00:01:37.907Z");
+        Instant instantTwo = Instant.parse("2004-10-18T00:02:06.907Z");
+
+        //eventRegister.addEvent(100, eventRegister.addPeriod(instant, instantTwo));
+        //eventRegister.registerUserToEvent(5, 1);
+        eventRegister.disableUser(5);
     }
 }
