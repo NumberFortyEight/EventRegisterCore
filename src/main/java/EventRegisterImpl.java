@@ -115,7 +115,7 @@ public class EventRegisterImpl implements EventRegister {
     public void disableUser(Integer userID) {
         try {
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            SQLRegisterService.setEventActive(connection, userID, false);
+            SQLRegisterService.setUserActive(connection, userID, false);
             connection.close();
         } catch (SQLException ignored) {
         }
@@ -135,7 +135,7 @@ public class EventRegisterImpl implements EventRegister {
     public void activateUser(Integer userID){
         try {
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            SQLRegisterService.setEventActive(connection, userID, true);
+            SQLRegisterService.setUserActive(connection, userID, true);
             connection.close();
         } catch (SQLException ignored) {
         }

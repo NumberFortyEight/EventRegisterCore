@@ -35,8 +35,8 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setInt(1, userID);
         preparedStatement.setInt(2, eventID);
-        preparedStatement.setBoolean(3, true);
-        preparedStatement.setBoolean(4, true);
+        preparedStatement.setString(3, "true");
+        preparedStatement.setString(4, "true");
         preparedStatement.execute();
         return true;
     }

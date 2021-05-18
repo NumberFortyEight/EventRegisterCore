@@ -12,6 +12,6 @@ public class psvm {
 
         //eventRegister.addEvent(100, eventRegister.addPeriod(instant, instantTwo));
         //eventRegister.registerUserToEvent(5, 1);
-        eventRegister.disableUser(5);
+        eventRegister.activateUser(5);
     }
 }
