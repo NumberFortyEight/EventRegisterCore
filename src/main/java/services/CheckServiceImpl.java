@@ -21,6 +21,15 @@ public class CheckServiceImpl implements CheckService {
     }
 
     @Override
+    public Boolean isPeriodExist(Connection connection, Integer periodID) throws SQLException {
+        String sql = "SELECT * FROM periods WHERE period_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, periodID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return resultSet.next();
+    }
+
+    @Override
     public boolean isEventExist(Connection connection, Integer eventID) {
         try {
             String sql = "SELECT * FROM events WHERE event_id = ?;";
