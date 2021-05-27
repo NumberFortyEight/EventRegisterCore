@@ -19,4 +19,5 @@ public interface SQLRegisterService {
     boolean registerUserToEvent(Connection connection, Integer userID, Integer EventID) throws SQLException;
     void setEventActive(Connection connection, Integer eventID, boolean active) throws SQLException;
     void setUserActive(Connection connection, Integer userID, boolean active) throws SQLException;
+    void truncateTablesAndRestartIdentity(Connection connection) throws SQLException;
 }

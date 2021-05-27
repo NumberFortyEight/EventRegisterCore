@@ -111,4 +111,13 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
         preparedStatement.setInt(2, userID);
         preparedStatement.executeUpdate();
     }
+
+    @Override
+    public void truncateTablesAndRestartIdentity(Connection connection) throws SQLException {
+        String sql = "truncate table events restart identity;\n" +
+                "        truncate table passlist restart identity;\n" +
+                "        truncate table periods restart identity;";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.execute();
+    }
 }

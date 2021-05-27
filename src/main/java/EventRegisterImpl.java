@@ -6,6 +6,7 @@ import services.CheckService;
 import services.CheckServiceImpl;
 import services.SQLRegisterServiceImpl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -70,6 +71,20 @@ public class EventRegisterImpl implements EventRegister {
             List<Event> allEvents = SQLRegisterService.getAllEvents(connection);
             connection.close();
             return allEvents;
+        } catch (SQLException sqlException) {
+            logger.error("Connection error ", sqlException);
+            return null;
+        }
+    }
+
+    @Override
+    public Boolean isEventExist(Integer eventID) {
+        try {
+            logger.info("check event: {}", eventID);
+            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            Boolean isPeriodExist = checkService.isEventExist(connection, eventID);
+            connection.close();
+            return isPeriodExist;
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;
@@ -237,34 +252,45 @@ public class EventRegisterImpl implements EventRegister {
 
     private void createAllTables() {
         try {
-            Class.forName("org.postgresql.Driver");
+            Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            connection.prepareStatement("create table if not exists events (" +
-                    "    event_id    serial  not null " +
-                    "        constraint event_pk " +
-                    "            primary key, " +
-                    "    location_id integer not null, " +
-                    "    period_id   integer not null );" +
-                    "alter table events " +
-                    "    owner to postgres; ").execute();
-            connection.prepareStatement("create table if not exists passlist (" +
-                    "    user_id         integer not null, " +
-                    "    event_id        integer not null, " +
-                    "    is_user_active  boolean, " +
-                    "    is_event_active boolean ); " +
-                    "alter table passlist " +
-                    "    owner to postgres; ").execute();
-            connection.prepareStatement("create table if not exists periods (" +
-                    "    period_id  serial    not null, " +
-                    "    start_date timestamp not null, " +
-                    "    end_date   timestamp not null );" +
-                    "alter table periods " +
+            connection.prepareStatement("create table events\n" +
+                    "(\n" +
+                    "    event_id    serial  not null\n" +
+                    "        constraint event_pk\n" +
+                    "            primary key,\n" +
+                    "    location_id integer not null,\n" +
+                    "    period_id   integer not null\n" +
+                    ");\n" +
+                    "\n" +
+                    "alter table events\n" +
+                    "    owner to postgres;").execute();
+            connection.prepareStatement("create table passlist\n" +
+                    "(\n" +
+                    "    user_id         integer not null,\n" +
+                    "    event_id        integer not null,\n" +
+                    "    is_user_active  varchar,\n" +
+                    "    is_event_active varchar\n" +
+                    ");\n" +
+                    "\n" +
+                    "alter table passlist\n" +
+                    "    owner to postgres;").execute();
+            connection.prepareStatement("create table periods\n" +
+                    "(\n" +
+                    "    period_id  serial                   not null\n" +
+                    "        constraint periods_pk\n" +
+                    "            primary key,\n" +
+                    "    start_date timestamp with time zone not null,\n" +
+                    "    end_date   timestamp with time zone not null\n" +
+                    ");\n" +
+                    "\n" +
+                    "alter table periods\n" +
                     "    owner to postgres;").execute();
             connection.close();
-        } catch (ClassNotFoundException classNotFoundException) {
-            logger.error("Driver postgres exception ", classNotFoundException);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
+        } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException classNotFoundException) {
+            logger.error("Driver postgres exception ", classNotFoundException);
         }
     }
 }
