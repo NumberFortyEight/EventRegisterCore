@@ -5,7 +5,7 @@ import java.time.Instant;
 
 public class PeriodsTest {
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/mainBase";
+    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
     private static final String USER ="postgres";
     private static final String PASSWORD = "root";
     private final EventRegister eventRegister = new EventRegisterImpl(URL, USER, PASSWORD);

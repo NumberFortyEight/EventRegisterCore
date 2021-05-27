@@ -254,7 +254,7 @@ public class EventRegisterImpl implements EventRegister {
         try {
             Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            connection.prepareStatement("create table events\n" +
+            connection.prepareStatement("create table if not exists events\n" +
                     "(\n" +
                     "    event_id    serial  not null\n" +
                     "        constraint event_pk\n" +
@@ -265,7 +265,7 @@ public class EventRegisterImpl implements EventRegister {
                     "\n" +
                     "alter table events\n" +
                     "    owner to postgres;").execute();
-            connection.prepareStatement("create table passlist\n" +
+            connection.prepareStatement("create table if not exists passlist\n" +
                     "(\n" +
                     "    user_id         integer not null,\n" +
                     "    event_id        integer not null,\n" +
@@ -275,7 +275,7 @@ public class EventRegisterImpl implements EventRegister {
                     "\n" +
                     "alter table passlist\n" +
                     "    owner to postgres;").execute();
-            connection.prepareStatement("create table periods\n" +
+            connection.prepareStatement("create table if not exists periods\n" +
                     "(\n" +
                     "    period_id  serial                   not null\n" +
                     "        constraint periods_pk\n" +
