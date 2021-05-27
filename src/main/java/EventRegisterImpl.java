@@ -51,6 +51,18 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     @Override
+    public void deleteEvent(Integer eventID) {
+        try {
+            logger.info("deleting event: {}", eventID);
+            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            SQLRegisterService.deleteEvent(connection, eventID);
+            connection.close();
+        } catch (SQLException sqlException) {
+            logger.error("Connection error ", sqlException);
+        }
+    }
+
+    @Override
     public List<Event> getAllEvents() {
         try {
             logger.info("getting all events");
@@ -168,6 +180,7 @@ public class EventRegisterImpl implements EventRegister {
     @Override
     public Boolean canUserEnter(Integer userID, Integer eventID, Instant entryTime) {
         try {
+            logger.info("checking whether user {} can log in to event {}", userID, eventID);
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
             boolean isUserCanEnter = checkService.canUserEnter(connection, userID, eventID, entryTime);
             connection.close();

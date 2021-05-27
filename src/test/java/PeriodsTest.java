@@ -5,10 +5,10 @@ import java.time.Instant;
 
 public class PeriodsTest {
 
-    public static final String URL = "jdbc:postgresql://localhost:5432/mainBase";
-    public static final String USER ="postgres";
-    public static final String PASSWORD = "root";
-    public final EventRegister eventRegister = new EventRegisterImpl(URL, USER, PASSWORD);
+    private static final String URL = "jdbc:postgresql://localhost:5432/mainBase";
+    private static final String USER ="postgres";
+    private static final String PASSWORD = "root";
+    private final EventRegister eventRegister = new EventRegisterImpl(URL, USER, PASSWORD);
 
     @Test
     public void isDuplicatePeriodsHaveOneID(){

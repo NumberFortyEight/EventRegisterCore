@@ -44,7 +44,7 @@ public class CheckServiceImpl implements CheckService {
 
     @Override
     public boolean isUserRegistered(Connection connection, Integer userID, Integer eventID) throws SQLException {
-        String sql = "SELECT * FROM passlist WHERE user_id = ? AND event_id = ? AND is_user_active = true AND is_event_active = true;";
+        String sql = "SELECT * FROM passlist WHERE user_id = ? AND event_id = ? AND is_user_active = 'true' AND is_event_active = 'true';";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setInt(1, userID);
         preparedStatement.setInt(2, eventID);
@@ -63,7 +63,12 @@ public class CheckServiceImpl implements CheckService {
                 Timestamp start_date = resultSet.getTimestamp("start_date");
                 Timestamp current = Timestamp.from(instant);
                 Timestamp end_date = resultSet.getTimestamp("end_date");
+
+                if (start_date.equals(current) || end_date.equals(current)) {
+                    return true;
+                }
                 return current.after(start_date) && current.before(end_date);
+
             } else return false;
         } else {
             return false;

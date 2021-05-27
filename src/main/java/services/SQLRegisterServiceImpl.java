@@ -73,8 +73,13 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
     }
 
     @Override
-    public void deleteEvent(Connection connection, Integer eventID) {
-
+    public void deleteEvent(Connection connection, Integer eventID) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM events WHERE event_id = ?");
+        preparedStatement.setInt(1, eventID);
+        preparedStatement.execute();
+        PreparedStatement preparedStatementForPassList = connection.prepareStatement("DELETE FROM passlist WHERE event_id = ?");
+        preparedStatementForPassList.setInt(1, eventID);
+        preparedStatementForPassList.execute();
     }
 
     @Override

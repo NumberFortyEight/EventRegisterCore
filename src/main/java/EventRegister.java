@@ -7,6 +7,7 @@ import java.util.List;
 public interface EventRegister {
     /** Может возвращать null в случе sql ошибки */
     Integer addEvent(int locationID, int periodID);
+    void deleteEvent(Integer eventID);
     List<Event> getAllEvents();
     /** Может возвращать null в случе sql ошибки */
     Integer addPeriod(Instant startInstant, Instant endInstant);
