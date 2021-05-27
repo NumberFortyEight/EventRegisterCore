@@ -1,5 +1,6 @@
 package entity;
 
+@SuppressWarnings("unused")
 public class Event {
     private Integer eventID;
     private Integer locationID;

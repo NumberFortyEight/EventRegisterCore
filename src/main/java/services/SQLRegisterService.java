@@ -6,7 +6,6 @@ import entity.Period;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 public interface SQLRegisterService {
@@ -16,8 +15,8 @@ public interface SQLRegisterService {
     Integer registerEvent(Connection connection, int locationID, int periodID) throws SQLException;
     List<Event> getAllEvents(Connection connection) throws SQLException;
     void deleteEvent(Connection connection, Integer eventID) throws SQLException;
+    @SuppressWarnings("SameReturnValue")
     boolean registerUserToEvent(Connection connection, Integer userID, Integer EventID) throws SQLException;
     void setEventActive(Connection connection, Integer eventID, boolean active) throws SQLException;
     void setUserActive(Connection connection, Integer userID, boolean active) throws SQLException;
-    void truncateTablesAndRestartIdentity(Connection connection) throws SQLException;
 }

@@ -30,16 +30,13 @@ public class CheckServiceImpl implements CheckService {
     }
 
     @Override
-    public boolean isEventExist(Connection connection, Integer eventID) {
-        try {
-            String sql = "SELECT * FROM events WHERE event_id = ?;";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, eventID);
-            preparedStatement.executeQuery();
-            return preparedStatement.getResultSet().next();
-        } catch (SQLException sqlException) {
-            return false;
-        }
+    public boolean isEventExist(Connection connection, Integer eventID) throws SQLException {
+        String sql = "SELECT * FROM events WHERE event_id = ?;";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, eventID);
+        preparedStatement.executeQuery();
+        return preparedStatement.getResultSet().next();
+
     }
 
     @Override

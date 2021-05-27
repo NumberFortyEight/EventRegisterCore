@@ -17,6 +17,7 @@ public interface EventRegister {
     Boolean isEventExist(Integer eventID);
     List<Event> getAllEvents();
 
+    @SuppressWarnings("UnusedReturnValue")
     Boolean registerUserToEvent(Integer userID, Integer EventID);
     /**Зарегистрирован ли юзер на ивент */
     Boolean isUserRegistered(Integer userID, Integer EventID);

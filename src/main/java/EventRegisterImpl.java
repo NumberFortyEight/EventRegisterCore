@@ -64,20 +64,6 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     @Override
-    public List<Event> getAllEvents() {
-        try {
-            logger.info("getting all events");
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            List<Event> allEvents = SQLRegisterService.getAllEvents(connection);
-            connection.close();
-            return allEvents;
-        } catch (SQLException sqlException) {
-            logger.error("Connection error ", sqlException);
-            return null;
-        }
-    }
-
-    @Override
     public Boolean isEventExist(Integer eventID) {
         try {
             logger.info("check event: {}", eventID);
@@ -85,6 +71,20 @@ public class EventRegisterImpl implements EventRegister {
             Boolean isPeriodExist = checkService.isEventExist(connection, eventID);
             connection.close();
             return isPeriodExist;
+        } catch (SQLException sqlException) {
+            logger.error("Connection error ", sqlException);
+            return null;
+        }
+    }
+
+    @Override
+    public List<Event> getAllEvents() {
+        try {
+            logger.info("getting all events");
+            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            List<Event> allEvents = SQLRegisterService.getAllEvents(connection);
+            connection.close();
+            return allEvents;
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;

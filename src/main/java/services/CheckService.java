@@ -3,7 +3,6 @@ package services;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 
 public interface CheckService {
