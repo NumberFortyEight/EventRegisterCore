@@ -67,6 +67,19 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
     }
 
     @Override
+    public Integer getEventsByLocationAndPeriodID(Connection connection, Integer locationID, Integer periodID) throws SQLException {
+        String sql = "SELECT event_id FROM events WHERE location_id = ? AND period_id = ?;";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, locationID);
+        preparedStatement.setInt(2, periodID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            return resultSet.getInt("event_id");
+        }
+        return null;
+    }
+
+    @Override
     public List<Event> getAllEvents(Connection connection) throws SQLException {
         List<Event> eventList = new ArrayList<>();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM events");

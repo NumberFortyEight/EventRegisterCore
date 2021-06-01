@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.List;
 
 public class EventsTest {
-    private final EventRegister eventRegister = new EventRegisterImpl("datasource.properties");
+    private final EventRegister eventRegister = new EventRegisterImpl("src/main/resources/datasource.properties");
 
     @Test
     public void addEvent() {
@@ -45,6 +45,19 @@ public class EventsTest {
         Assert.assertFalse(eventRegister.getAllEvents()
                 .stream()
                 .anyMatch(event -> event.getEventID().equals(eventID)));
+        eventRegister.deletePeriodAndEvents(periodID);
+    }
+    @Test
+    public void duplicateEvent() {
+        Instant start = Instant.parse("2018-09-18T00:01:37.907Z");
+        Instant end = Instant.parse("2021-10-18T00:02:06.907Z");
+
+        Integer periodID = eventRegister.addPeriod(start, end);
+        Integer eventID = eventRegister.addEvent(100, periodID);
+        Integer duplicateEventID = eventRegister.addEvent(100, periodID);
+
+        Assert.assertEquals(eventID, duplicateEventID);
+
         eventRegister.deletePeriodAndEvents(periodID);
     }
 

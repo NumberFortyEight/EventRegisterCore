@@ -7,7 +7,7 @@ import java.util.GregorianCalendar;
 
 public class passListTest {
 
-    private final EventRegister eventRegister = null;
+    private final EventRegister eventRegister = new EventRegisterImpl("src/main/resources/datasource.properties");
 
     @Test
     public void passlist(){

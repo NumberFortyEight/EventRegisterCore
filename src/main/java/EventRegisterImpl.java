@@ -8,9 +8,7 @@ import services.CheckService;
 import services.CheckServiceImpl;
 import services.SQLRegisterServiceImpl;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
@@ -32,11 +30,18 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Integer addEvent(Integer locationID, Integer periodID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("adding event with locationID: {} and periodID: {}", locationID, periodID);
-
             if (checkService.isPeriodExist(connection, periodID)) {
-                return SQLRegisterService.registerEvent(connection, locationID, periodID);
+                Integer duplicateEventID = SQLRegisterService.getEventsByLocationAndPeriodID(connection, locationID, periodID);
+                if (duplicateEventID == null) {
+                    return SQLRegisterService.registerEvent(connection, locationID, periodID);
+                } else {
+                    logger.warn("event with periodID {} and locationID {} is a duplicate of event {}",
+                            periodID, locationID, duplicateEventID);
+                    return duplicateEventID;
+                }
+
             } else {
                 logger.warn("period: {} does not exist.", periodID);
                 return null;
@@ -49,7 +54,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void deleteEvent(Integer eventID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("deleting event: {}", eventID);
             SQLRegisterService.deleteEvent(connection, eventID);
         } catch (SQLException sqlException) {
@@ -59,7 +64,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void changeEventPeriod(Integer eventID, Integer periodID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("update event {}, period: {}", eventID, periodID);
             if (checkService.isEventExist(connection, eventID) && checkService.isPeriodExist(connection, periodID)) {
                 SQLRegisterService.changeEventPeriod(connection, eventID, periodID);
@@ -72,8 +77,16 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     @Override
+    public void changeEventLocation(Integer eventID, Integer locationID) {
+        try (Connection connection = dataSource.getConnection()) {
+        } catch (SQLException sqlException) {
+            logger.error("Connection error ", sqlException);
+        }
+    }
+
+    @Override
     public Boolean isEventExist(Integer eventID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("check event: {}", eventID);
             return checkService.isEventExist(connection, eventID);
         } catch (SQLException sqlException) {
@@ -84,7 +97,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public List<Event> getAllEvents() {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("getting all events");
             return SQLRegisterService.getAllEvents(connection);
         } catch (SQLException sqlException) {
@@ -95,11 +108,13 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Integer addPeriod(Instant startInstant, Instant endInstant) {
-        try (Connection connection = dataSource.getConnection()){
-            logger.info("Adding period with startInstant {} \n and endInstant {}", startInstant.toString(), endInstant.toString());
+        try (Connection connection = dataSource.getConnection()) {
+            logger.info("Adding period with startInstant {} and endInstant {}", startInstant.toString(), endInstant.toString());
             Optional<Integer> optionalPeriod = checkService.getOptionalPeriod(connection, startInstant, endInstant);
             if (optionalPeriod.isPresent()) {
-                return optionalPeriod.get();
+                Integer duplicatePeriodID = optionalPeriod.get();
+                logger.warn("duplicate period: ID {}", duplicatePeriodID);
+                return duplicatePeriodID;
             } else {
                 Integer addedPeriodID = SQLRegisterService.addPeriod(connection, startInstant, endInstant);
                 logger.info("added period have ID {}", addedPeriodID);
@@ -113,7 +128,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public List<Period> getAllPeriods() {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("getting all periods");
             return SQLRegisterService.getAllPeriods(connection);
         } catch (SQLException sqlException) {
@@ -124,7 +139,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean isPeriodExist(Integer periodID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("check period: {}", periodID);
             return checkService.isPeriodExist(connection, periodID);
         } catch (SQLException sqlException) {
@@ -135,7 +150,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void deletePeriodAndEvents(Integer periodID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("removing period {} and event(by period id) ", periodID);
             SQLRegisterService.deletePeriodAndEvents(connection, periodID);
         } catch (SQLException sqlException) {
@@ -145,9 +160,9 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean registerUserToEvent(Integer userID, Integer eventID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             if (checkService.isEventExist(connection, eventID)) {
-                logger.info("register user: "+ userID + " to event: " + eventID );
+                logger.info("register user: " + userID + " to event: " + eventID);
                 return SQLRegisterService.registerUserToEvent(connection, userID, eventID);
             } else {
                 logger.warn("Event not found. ID: " + eventID);
@@ -161,9 +176,9 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean isUserRegistered(Integer userID, Integer eventID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             if (checkService.isEventExist(connection, eventID)) {
-                logger.info("Check user: "+ userID + " to event: " + eventID );
+                logger.info("Check user: " + userID + " to event: " + eventID);
                 return checkService.isUserRegistered(connection, userID, eventID);
             } else {
                 logger.warn("Event not found. ID: " + eventID);
@@ -177,7 +192,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean canUserEnter(Integer userID, Integer eventID, Instant entryTime) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             logger.info("checking whether user {} can log in to event {}", userID, eventID);
             return checkService.canUserEnter(connection, userID, eventID, entryTime);
         } catch (SQLException sqlException) {
@@ -188,7 +203,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void disableEvent(Integer eventID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             SQLRegisterService.setEventActive(connection, eventID, false);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
@@ -197,7 +212,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void disableUser(Integer userID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             SQLRegisterService.setUserActive(connection, userID, false);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
@@ -206,7 +221,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void activateEvent(Integer eventID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             SQLRegisterService.setEventActive(connection, eventID, true);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
@@ -215,7 +230,7 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void activateUser(Integer userID) {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             SQLRegisterService.setUserActive(connection, userID, true);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
@@ -223,7 +238,7 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     private void createAllTables() {
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             connection.prepareStatement("create table if not exists events\n" +
                     "(\n" +
                     "    event_id    serial  not null\n" +

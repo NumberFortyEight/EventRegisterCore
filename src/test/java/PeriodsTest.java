@@ -6,7 +6,7 @@ import java.time.Instant;
 public class PeriodsTest {
 
     private final EventRegister eventRegister =
-            new EventRegisterImpl("C:\\Users\\user\\IdeaProjects\\RegisterEvent\\src\\main\\resources\\datasource.properties");
+            new EventRegisterImpl("src/main/resources/datasource.properties");
 
     @Test
     public void isDuplicatePeriodsHaveOneID(){

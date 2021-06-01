@@ -15,6 +15,7 @@ public interface EventRegister {
     Integer addEvent(Integer locationID, Integer periodID);
     void deleteEvent(Integer eventID);
     void changeEventPeriod(Integer eventID, Integer periodID);
+    void changeEventLocation(Integer eventID, Integer locationID);
     Boolean isEventExist(Integer eventID);
     List<Event> getAllEvents();
 

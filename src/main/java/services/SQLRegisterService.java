@@ -14,6 +14,7 @@ public interface SQLRegisterService {
     void deletePeriodAndEvents(Connection connection, Integer periodID) throws SQLException;
     Integer registerEvent(Connection connection, int locationID, int periodID) throws SQLException;
     void changeEventPeriod(Connection connection, Integer eventID, Integer periodID) throws SQLException;
+    Integer getEventsByLocationAndPeriodID(Connection connection, Integer locationID, Integer periodID) throws SQLException;
     List<Event> getAllEvents(Connection connection) throws SQLException;
     void deleteEvent(Connection connection, Integer eventID) throws SQLException;
     @SuppressWarnings("SameReturnValue")
