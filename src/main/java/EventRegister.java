@@ -12,8 +12,9 @@ public interface EventRegister {
     Boolean isPeriodExist(Integer periodID);
     List<Period> getAllPeriods();
 
-    Integer addEvent(int locationID, int periodID);
+    Integer addEvent(Integer locationID, Integer periodID);
     void deleteEvent(Integer eventID);
+    void changeEventTime(Integer eventID, Integer periodID);
     Boolean isEventExist(Integer eventID);
     List<Event> getAllEvents();
 

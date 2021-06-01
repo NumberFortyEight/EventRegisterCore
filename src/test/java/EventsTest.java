@@ -1,7 +1,9 @@
+import entity.Event;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.Instant;
+import java.util.List;
 
 public class EventsTest {
     private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
@@ -47,5 +49,35 @@ public class EventsTest {
                 .stream()
                 .anyMatch(event -> event.getEventID().equals(eventID)));
         eventRegister.deletePeriodAndEvents(periodID);
+    }
+
+    @Test
+    public void changePeriod() {
+        Instant start = Instant.parse("2017-09-18T00:01:37.907Z");
+        Instant end = Instant.parse("2022-10-18T00:02:06.907Z");
+        Instant secondEnd = Instant.parse("2022-10-18T00:02:07.907Z");
+
+        Integer periodID = eventRegister.addPeriod(start, end);
+        Integer periodForChangeID = eventRegister.addPeriod(start, secondEnd);
+        
+        Assert.assertNotEquals(periodForChangeID, periodID);
+        
+        Integer eventID = eventRegister.addEvent(100, periodID);
+        eventRegister.changeEventTime(eventID, periodForChangeID);
+
+        List<Event> allEvents = eventRegister.getAllEvents();
+        boolean isExistEventWithOldPeriod = allEvents
+                .stream()
+                .anyMatch(event -> event.getEventID().equals(eventID) && event.getPeriodID().equals(periodID));
+        Assert.assertFalse(isExistEventWithOldPeriod);
+
+        boolean isExistEventWithActualPeriod = allEvents
+                .stream()
+                .anyMatch(event -> event.getEventID().equals(eventID) && event.getPeriodID().equals(periodForChangeID));
+        Assert.assertTrue(isExistEventWithActualPeriod);
+
+        eventRegister.deleteEvent(eventID);
+        eventRegister.deletePeriodAndEvents(periodID);
+        eventRegister.deletePeriodAndEvents(periodForChangeID);
     }
 }

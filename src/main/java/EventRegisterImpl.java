@@ -32,7 +32,7 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     @Override
-    public Integer addEvent(int locationID, int periodID) {
+    public Integer addEvent(Integer locationID, Integer periodID) {
         try {
             logger.info("adding event with locationID: {} and periodID: {}", locationID, periodID);
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
@@ -57,6 +57,18 @@ public class EventRegisterImpl implements EventRegister {
             logger.info("deleting event: {}", eventID);
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
             SQLRegisterService.deleteEvent(connection, eventID);
+            connection.close();
+        } catch (SQLException sqlException) {
+            logger.error("Connection error ", sqlException);
+        }
+    }
+
+    @Override
+    public void changeEventTime(Integer eventID, Integer periodID) {
+        try {
+            logger.info("update event {}, period: {}", eventID, periodID);
+            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            SQLRegisterService.changeEventPeriod(connection, eventID, periodID);
             connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);

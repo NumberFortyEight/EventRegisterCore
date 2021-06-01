@@ -58,6 +58,15 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
     }
 
     @Override
+    public void changeEventPeriod(Connection connection, Integer eventID, Integer periodID) throws SQLException {
+        String sql = "UPDATE events SET period_id = ? where event_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, periodID);
+        preparedStatement.setInt(2, eventID);
+        preparedStatement.executeUpdate();
+    }
+
+    @Override
     public List<Event> getAllEvents(Connection connection) throws SQLException {
         List<Event> eventList = new ArrayList<>();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM events");
