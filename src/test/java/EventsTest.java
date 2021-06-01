@@ -6,10 +6,7 @@ import java.time.Instant;
 import java.util.List;
 
 public class EventsTest {
-    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "root";
-    private final EventRegister eventRegister = new EventRegisterImpl(URL, USER, PASSWORD);
+    private final EventRegister eventRegister = new EventRegisterImpl("datasource.properties");
 
     @Test
     public void addEvent() {

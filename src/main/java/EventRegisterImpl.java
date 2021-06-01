@@ -22,15 +22,10 @@ public class EventRegisterImpl implements EventRegister {
     private final CheckService checkService = new CheckServiceImpl();
     private final services.SQLRegisterService SQLRegisterService = new SQLRegisterServiceImpl();
 
-    private static final HikariConfig config = new HikariConfig();
     private static HikariDataSource dataSource;
 
-    public EventRegisterImpl(String DB_URL, String USER, String PASSWORD) {
-        config.setJdbcUrl(DB_URL);
-        config.setUsername(USER);
-        config.setPassword(PASSWORD);
-        config.setDriverClassName("org.postgresql.Driver");
-        config.setConnectionTimeout(30000);
+    public EventRegisterImpl(String dataSourcePropertiesPath) {
+        HikariConfig config = new HikariConfig(dataSourcePropertiesPath);
         dataSource = new HikariDataSource(config);
         createAllTables();
     }
@@ -66,7 +61,11 @@ public class EventRegisterImpl implements EventRegister {
     public void changeEventPeriod(Integer eventID, Integer periodID) {
         try (Connection connection = dataSource.getConnection()){
             logger.info("update event {}, period: {}", eventID, periodID);
-            SQLRegisterService.changeEventPeriod(connection, eventID, periodID);
+            if (checkService.isEventExist(connection, eventID) && checkService.isPeriodExist(connection, periodID)) {
+                SQLRegisterService.changeEventPeriod(connection, eventID, periodID);
+            } else {
+                logger.warn("period: {} or event: {} not exist", periodID, eventID);
+            }
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
