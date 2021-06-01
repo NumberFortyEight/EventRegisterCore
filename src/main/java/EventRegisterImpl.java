@@ -1,3 +1,5 @@
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import entity.Event;
 import entity.Period;
 import org.slf4j.Logger;
@@ -15,32 +17,31 @@ import java.util.List;
 import java.util.Optional;
 
 public class EventRegisterImpl implements EventRegister {
+    private final static Logger logger = LoggerFactory.getLogger(EventRegisterImpl.class);
 
     private final CheckService checkService = new CheckServiceImpl();
     private final services.SQLRegisterService SQLRegisterService = new SQLRegisterServiceImpl();
-    private final static Logger logger = LoggerFactory.getLogger(EventRegisterImpl.class);
 
-    private final String DB_URL;
-    private final String USER;
-    private final String PASSWORD;
+    private static final HikariConfig config = new HikariConfig();
+    private static HikariDataSource dataSource;
 
     public EventRegisterImpl(String DB_URL, String USER, String PASSWORD) {
-        this.DB_URL = DB_URL;
-        this.USER = USER;
-        this.PASSWORD = PASSWORD;
+        config.setJdbcUrl(DB_URL);
+        config.setUsername(USER);
+        config.setPassword(PASSWORD);
+        config.setDriverClassName("org.postgresql.Driver");
+        config.setConnectionTimeout(30000);
+        dataSource = new HikariDataSource(config);
         createAllTables();
     }
 
     @Override
     public Integer addEvent(Integer locationID, Integer periodID) {
-        try {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("adding event with locationID: {} and periodID: {}", locationID, periodID);
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
 
             if (checkService.isPeriodExist(connection, periodID)) {
-                Integer eventID = SQLRegisterService.registerEvent(connection, locationID, periodID);
-                connection.close();
-                return eventID;
+                return SQLRegisterService.registerEvent(connection, locationID, periodID);
             } else {
                 logger.warn("period: {} does not exist.", periodID);
                 return null;
@@ -53,23 +54,19 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void deleteEvent(Integer eventID) {
-        try {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("deleting event: {}", eventID);
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
             SQLRegisterService.deleteEvent(connection, eventID);
-            connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
     }
 
     @Override
-    public void changeEventTime(Integer eventID, Integer periodID) {
-        try {
+    public void changeEventPeriod(Integer eventID, Integer periodID) {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("update event {}, period: {}", eventID, periodID);
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
             SQLRegisterService.changeEventPeriod(connection, eventID, periodID);
-            connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -77,12 +74,9 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean isEventExist(Integer eventID) {
-        try {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("check event: {}", eventID);
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            Boolean isPeriodExist = checkService.isEventExist(connection, eventID);
-            connection.close();
-            return isPeriodExist;
+            return checkService.isEventExist(connection, eventID);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;
@@ -91,12 +85,9 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public List<Event> getAllEvents() {
-        try {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("getting all events");
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            List<Event> allEvents = SQLRegisterService.getAllEvents(connection);
-            connection.close();
-            return allEvents;
+            return SQLRegisterService.getAllEvents(connection);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;
@@ -105,17 +96,14 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Integer addPeriod(Instant startInstant, Instant endInstant) {
-        try {
-            logger.info("Adding period with startInstant {} and endInstant {}", startInstant.toString(), endInstant.toString());
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection connection = dataSource.getConnection()){
+            logger.info("Adding period with startInstant {} \n and endInstant {}", startInstant.toString(), endInstant.toString());
             Optional<Integer> optionalPeriod = checkService.getOptionalPeriod(connection, startInstant, endInstant);
             if (optionalPeriod.isPresent()) {
-                connection.close();
                 return optionalPeriod.get();
             } else {
                 Integer addedPeriodID = SQLRegisterService.addPeriod(connection, startInstant, endInstant);
                 logger.info("added period have ID {}", addedPeriodID);
-                connection.close();
                 return addedPeriodID;
             }
         } catch (SQLException sqlException) {
@@ -126,12 +114,9 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public List<Period> getAllPeriods() {
-        try {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("getting all periods");
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            List<Period> allPeriods = SQLRegisterService.getAllPeriods(connection);
-            connection.close();
-            return allPeriods;
+            return SQLRegisterService.getAllPeriods(connection);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;
@@ -140,12 +125,9 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean isPeriodExist(Integer periodID) {
-        try {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("check period: {}", periodID);
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            Boolean isPeriodExist = checkService.isPeriodExist(connection, periodID);
-            connection.close();
-            return isPeriodExist;
+            return checkService.isPeriodExist(connection, periodID);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;
@@ -154,11 +136,9 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void deletePeriodAndEvents(Integer periodID) {
-        try {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("removing period {} and event(by period id) ", periodID);
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
             SQLRegisterService.deletePeriodAndEvents(connection, periodID);
-            connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -166,16 +146,12 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean registerUserToEvent(Integer userID, Integer eventID) {
-        try {
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection connection = dataSource.getConnection()){
             if (checkService.isEventExist(connection, eventID)) {
                 logger.info("register user: "+ userID + " to event: " + eventID );
-                boolean userIsRegistered = SQLRegisterService.registerUserToEvent(connection, userID, eventID);
-                connection.close();
-                return userIsRegistered;
+                return SQLRegisterService.registerUserToEvent(connection, userID, eventID);
             } else {
                 logger.warn("Event not found. ID: " + eventID);
-                connection.close();
                 return false;
             }
         } catch (SQLException sqlException) {
@@ -186,16 +162,12 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean isUserRegistered(Integer userID, Integer eventID) {
-        try {
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection connection = dataSource.getConnection()){
             if (checkService.isEventExist(connection, eventID)) {
                 logger.info("Check user: "+ userID + " to event: " + eventID );
-                boolean userRegistered = checkService.isUserRegistered(connection, userID, eventID);
-                connection.close();
-                return userRegistered;
+                return checkService.isUserRegistered(connection, userID, eventID);
             } else {
                 logger.warn("Event not found. ID: " + eventID);
-                connection.close();
                 return false;
             }
         } catch (SQLException sqlException) {
@@ -206,12 +178,9 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Boolean canUserEnter(Integer userID, Integer eventID, Instant entryTime) {
-        try {
+        try (Connection connection = dataSource.getConnection()){
             logger.info("checking whether user {} can log in to event {}", userID, eventID);
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            boolean isUserCanEnter = checkService.canUserEnter(connection, userID, eventID, entryTime);
-            connection.close();
-            return isUserCanEnter;
+            return checkService.canUserEnter(connection, userID, eventID, entryTime);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;
@@ -220,10 +189,8 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void disableEvent(Integer eventID) {
-        try {
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection connection = dataSource.getConnection()){
             SQLRegisterService.setEventActive(connection, eventID, false);
-            connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -231,10 +198,8 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void disableUser(Integer userID) {
-        try {
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection connection = dataSource.getConnection()){
             SQLRegisterService.setUserActive(connection, userID, false);
-            connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -242,10 +207,8 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void activateEvent(Integer eventID) {
-        try {
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection connection = dataSource.getConnection()){
             SQLRegisterService.setEventActive(connection, eventID, true);
-            connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -253,19 +216,15 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public void activateUser(Integer userID) {
-        try {
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection connection = dataSource.getConnection()){
             SQLRegisterService.setUserActive(connection, userID, true);
-            connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
     }
 
     private void createAllTables() {
-        try {
-            Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
-            Connection connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection connection = dataSource.getConnection()){
             connection.prepareStatement("create table if not exists events\n" +
                     "(\n" +
                     "    event_id    serial  not null\n" +
@@ -298,11 +257,8 @@ public class EventRegisterImpl implements EventRegister {
                     "\n" +
                     "alter table periods\n" +
                     "    owner to postgres;").execute();
-            connection.close();
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
-        } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException classNotFoundException) {
-            logger.error("Driver postgres exception ", classNotFoundException);
         }
     }
 }

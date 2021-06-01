@@ -63,7 +63,7 @@ public class EventsTest {
         Assert.assertNotEquals(periodForChangeID, periodID);
         
         Integer eventID = eventRegister.addEvent(100, periodID);
-        eventRegister.changeEventTime(eventID, periodForChangeID);
+        eventRegister.changeEventPeriod(eventID, periodForChangeID);
 
         List<Event> allEvents = eventRegister.getAllEvents();
         boolean isExistEventWithOldPeriod = allEvents

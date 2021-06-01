@@ -19,6 +19,7 @@ public class PeriodsTest {
         eventRegister.deletePeriodAndEvents(periodID);
         Assert.assertEquals(periodID, periodIDTwo);
     }
+
     @Test
     public void eventsDeletedWithPeriod(){
         Instant start = Instant.parse("2019-09-18T00:01:37.907Z");
