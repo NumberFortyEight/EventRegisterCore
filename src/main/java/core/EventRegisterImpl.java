@@ -1,3 +1,5 @@
+package core;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import entity.Event;
@@ -6,7 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import services.CheckService;
 import services.CheckServiceImpl;
-import services.SQLRegisterServiceImpl;
+import services.RegisterService;
+import services.RegisterServiceImpl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,8 +21,7 @@ public class EventRegisterImpl implements EventRegister {
     private final static Logger logger = LoggerFactory.getLogger(EventRegisterImpl.class);
 
     private final CheckService checkService = new CheckServiceImpl();
-    private final services.SQLRegisterService SQLRegisterService = new SQLRegisterServiceImpl();
-
+    private final RegisterService registerService = new RegisterServiceImpl();
     private static HikariDataSource dataSource;
 
     public EventRegisterImpl(String dataSourcePropertiesPath) {
@@ -33,9 +35,9 @@ public class EventRegisterImpl implements EventRegister {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("adding event with locationID: {} and periodID: {}", locationID, periodID);
             if (checkService.isPeriodExist(connection, periodID)) {
-                Integer duplicateEventID = SQLRegisterService.getEventsByLocationAndPeriodID(connection, locationID, periodID);
+                Integer duplicateEventID = registerService.getEventIDByLocationAndPeriodID(connection, locationID, periodID);
                 if (duplicateEventID == null) {
-                    return SQLRegisterService.registerEvent(connection, locationID, periodID);
+                    return registerService.registerEvent(connection, locationID, periodID);
                 } else {
                     logger.warn("event with periodID {} and locationID {} is a duplicate of event {}",
                             periodID, locationID, duplicateEventID);
@@ -56,7 +58,7 @@ public class EventRegisterImpl implements EventRegister {
     public void deleteEvent(Integer eventID) {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("deleting event: {}", eventID);
-            SQLRegisterService.deleteEvent(connection, eventID);
+            registerService.deleteEvent(connection, eventID);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -67,7 +69,7 @@ public class EventRegisterImpl implements EventRegister {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("update event {}, period: {}", eventID, periodID);
             if (checkService.isEventExist(connection, eventID) && checkService.isPeriodExist(connection, periodID)) {
-                SQLRegisterService.changeEventPeriod(connection, eventID, periodID);
+                registerService.changeEventPeriod(connection, eventID, periodID);
             } else {
                 logger.warn("period: {} or event: {} not exist", periodID, eventID);
             }
@@ -79,6 +81,8 @@ public class EventRegisterImpl implements EventRegister {
     @Override
     public void changeEventLocation(Integer eventID, Integer locationID) {
         try (Connection connection = dataSource.getConnection()) {
+            logger.info("change event: {} location to: {}", eventID, locationID);
+            registerService.changeEventLocation(connection, eventID, locationID);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -96,10 +100,32 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     @Override
+    public Event getEventByID(Integer eventID) {
+        try (Connection connection = dataSource.getConnection()) {
+            logger.info("getting Event by id: {}", eventID);
+            return registerService.getEventByID(connection, eventID);
+        } catch (SQLException sqlException) {
+            logger.error("Connection error ", sqlException);
+            return null;
+        }
+    }
+
+    @Override
+    public List<Event> getEventsByPeriod(Integer periodID) {
+        try (Connection connection = dataSource.getConnection()) {
+            logger.info("getting Events by period: {}", periodID);
+            return registerService.getEventsByPeriod(connection, periodID);
+        } catch (SQLException sqlException) {
+            logger.error("Connection error ", sqlException);
+            return null;
+        }
+    }
+
+    @Override
     public List<Event> getAllEvents() {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("getting all events");
-            return SQLRegisterService.getAllEvents(connection);
+            return registerService.getAllEvents(connection);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;
@@ -116,7 +142,7 @@ public class EventRegisterImpl implements EventRegister {
                 logger.warn("duplicate period: ID {}", duplicatePeriodID);
                 return duplicatePeriodID;
             } else {
-                Integer addedPeriodID = SQLRegisterService.addPeriod(connection, startInstant, endInstant);
+                Integer addedPeriodID = registerService.addPeriod(connection, startInstant, endInstant);
                 logger.info("added period have ID {}", addedPeriodID);
                 return addedPeriodID;
             }
@@ -130,7 +156,7 @@ public class EventRegisterImpl implements EventRegister {
     public List<Period> getAllPeriods() {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("getting all periods");
-            return SQLRegisterService.getAllPeriods(connection);
+            return registerService.getAllPeriods(connection);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
             return null;
@@ -152,7 +178,7 @@ public class EventRegisterImpl implements EventRegister {
     public void deletePeriodAndEvents(Integer periodID) {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("removing period {} and event(by period id) ", periodID);
-            SQLRegisterService.deletePeriodAndEvents(connection, periodID);
+            registerService.deletePeriodAndEvents(connection, periodID);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -163,7 +189,7 @@ public class EventRegisterImpl implements EventRegister {
         try (Connection connection = dataSource.getConnection()) {
             if (checkService.isEventExist(connection, eventID)) {
                 logger.info("register user: " + userID + " to event: " + eventID);
-                return SQLRegisterService.registerUserToEvent(connection, userID, eventID);
+                return registerService.registerUserToEvent(connection, userID, eventID);
             } else {
                 logger.warn("Event not found. ID: " + eventID);
                 return false;
@@ -204,7 +230,7 @@ public class EventRegisterImpl implements EventRegister {
     @Override
     public void disableEvent(Integer eventID) {
         try (Connection connection = dataSource.getConnection()) {
-            SQLRegisterService.setEventActive(connection, eventID, false);
+            registerService.setEventActive(connection, eventID, false);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -213,7 +239,7 @@ public class EventRegisterImpl implements EventRegister {
     @Override
     public void disableUser(Integer userID) {
         try (Connection connection = dataSource.getConnection()) {
-            SQLRegisterService.setUserActive(connection, userID, false);
+            registerService.setUserActive(connection, userID, false);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -222,7 +248,7 @@ public class EventRegisterImpl implements EventRegister {
     @Override
     public void activateEvent(Integer eventID) {
         try (Connection connection = dataSource.getConnection()) {
-            SQLRegisterService.setEventActive(connection, eventID, true);
+            registerService.setEventActive(connection, eventID, true);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
@@ -231,7 +257,7 @@ public class EventRegisterImpl implements EventRegister {
     @Override
     public void activateUser(Integer userID) {
         try (Connection connection = dataSource.getConnection()) {
-            SQLRegisterService.setUserActive(connection, userID, true);
+            registerService.setUserActive(connection, userID, true);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }

@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLRegisterServiceImpl implements SQLRegisterService {
+public class RegisterServiceImpl implements RegisterService {
 
     public Integer addPeriod(Connection connection, Instant startDate, Instant endDate) throws SQLException {
         String sql = "INSERT INTO periods (start_date, end_date) Values (?,?)";
@@ -67,7 +67,16 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
     }
 
     @Override
-    public Integer getEventsByLocationAndPeriodID(Connection connection, Integer locationID, Integer periodID) throws SQLException {
+    public void changeEventLocation(Connection connection, Integer eventID, Integer locationID) throws SQLException {
+        String sql = "UPDATE events SET location_id = ? where event_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, locationID);
+        preparedStatement.setInt(2, eventID);
+        preparedStatement.executeUpdate();
+    }
+
+    @Override
+    public Integer getEventIDByLocationAndPeriodID(Connection connection, Integer locationID, Integer periodID) throws SQLException {
         String sql = "SELECT event_id FROM events WHERE location_id = ? AND period_id = ?;";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setInt(1, locationID);
@@ -84,6 +93,20 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
         List<Event> eventList = new ArrayList<>();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM events");
         ResultSet resultSet = preparedStatement.executeQuery();
+        return getEvents(eventList, resultSet);
+    }
+
+    @Override
+    public List<Event> getEventsByPeriod(Connection connection, Integer periodID) throws SQLException {
+        List<Event> eventList = new ArrayList<>();
+        String sql = "SELECT * FROM events WHERE period_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, periodID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return getEvents(eventList, resultSet);
+    }
+
+    private List<Event> getEvents(List<Event> eventList, ResultSet resultSet) throws SQLException {
         while (resultSet.next()) {
             int event_id = resultSet.getInt("event_id");
             int location_id = resultSet.getInt("location_id");
@@ -91,6 +114,21 @@ public class SQLRegisterServiceImpl implements SQLRegisterService {
             eventList.add(new Event(event_id, location_id, period_id));
         }
         return eventList;
+    }
+
+    @Override
+    public Event getEventByID(Connection connection, Integer eventID) throws SQLException {
+        String sql = "SELECT * FROM events WHERE event_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, eventID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            int event_id = resultSet.getInt("event_id");
+            int location_id = resultSet.getInt("location_id");
+            int period_id = resultSet.getInt("period_id");
+            return new Event(event_id, location_id, period_id);
+        }
+        return null;
     }
 
     @Override

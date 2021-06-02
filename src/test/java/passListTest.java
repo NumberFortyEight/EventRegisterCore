@@ -1,3 +1,5 @@
+import core.EventRegister;
+import core.EventRegisterImpl;
 import org.junit.Assert;
 import org.junit.Test;
 

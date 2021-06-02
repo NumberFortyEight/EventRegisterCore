@@ -1,3 +1,5 @@
+package core;
+
 import entity.Event;
 import entity.Period;
 
@@ -17,6 +19,8 @@ public interface EventRegister {
     void changeEventPeriod(Integer eventID, Integer periodID);
     void changeEventLocation(Integer eventID, Integer locationID);
     Boolean isEventExist(Integer eventID);
+    Event getEventByID(Integer eventID);
+    List<Event> getEventsByPeriod(Integer periodID);
     List<Event> getAllEvents();
 
     @SuppressWarnings("UnusedReturnValue")

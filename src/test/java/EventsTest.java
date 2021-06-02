@@ -1,3 +1,5 @@
+import core.EventRegister;
+import core.EventRegisterImpl;
 import entity.Event;
 import org.junit.Assert;
 import org.junit.Test;
@@ -90,4 +92,42 @@ public class EventsTest {
         eventRegister.deletePeriodAndEvents(periodID);
         eventRegister.deletePeriodAndEvents(periodForChangeID);
     }
+    @Test
+    public void changeLocation() {
+        Instant start = Instant.parse("2011-09-18T00:01:37.907Z");
+        Instant end = Instant.parse("2023-10-18T00:02:06.907Z");
+
+        Integer firstLocationID = 1337;
+        Integer actualLocationID = 1488;
+
+        Integer periodID = eventRegister.addPeriod(start, end);
+        Integer eventID = eventRegister.addEvent(firstLocationID, periodID);
+
+        eventRegister.changeEventLocation(eventID, actualLocationID);
+
+        Event eventByID = eventRegister.getEventByID(eventID);
+        Assert.assertEquals(eventByID.getLocationID(), actualLocationID);
+
+        eventRegister.deletePeriodAndEvents(periodID);
+        eventRegister.deleteEvent(eventID);
+    }
+    @Test
+    public void getEventsByPeriod() {
+        Instant start = Instant.parse("2010-08-17T00:02:37.907Z");
+        Instant end = Instant.parse("2019-10-12T00:03:07.907Z");
+
+        Integer periodID = eventRegister.addPeriod(start, end);
+        for (int i = 0; i < 5; i++) {
+            eventRegister.addEvent(i, periodID);
+        }
+        List<Event> eventsByPeriod = eventRegister.getEventsByPeriod(periodID);
+        Assert.assertEquals(eventsByPeriod.size(), 5);
+        for (int i = 0; i < 5; i++) {
+            boolean equals = eventsByPeriod.get(i).getLocationID().equals(i);
+            Assert.assertTrue(equals);
+        }
+        eventRegister.deletePeriodAndEvents(periodID);
+        Assert.assertTrue(eventRegister.getAllEvents().isEmpty());
+    }
+
 }
