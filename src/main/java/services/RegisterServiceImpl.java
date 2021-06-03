@@ -25,6 +25,20 @@ public class RegisterServiceImpl implements RegisterService {
     public List<Period> getAllPeriods(Connection connection) throws SQLException {
         List<Period> periodList = new ArrayList<>();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM periods");
+        return getPeriods(periodList, preparedStatement);
+    }
+
+    @Override
+    public List<Period> getPeriodsForaPeriod(Connection connection, Instant startDate, Instant endDate) throws SQLException {
+        List<Period> periodList = new ArrayList<>();
+        String sql ="SELECT * FROM periods WHERE start_date >= ? AND end_date <= ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setTimestamp(1, Timestamp.from(startDate));
+        preparedStatement.setTimestamp(2, Timestamp.from(endDate));
+        return getPeriods(periodList, preparedStatement);
+    }
+
+    private List<Period> getPeriods(List<Period> periodList, PreparedStatement preparedStatement) throws SQLException {
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
             int period_id = resultSet.getInt("period_id");
@@ -37,10 +51,12 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public void deletePeriodAndEvents(Connection connection, Integer periodID) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM periods WHERE period_id = ?");
+        PreparedStatement preparedStatement =
+                connection.prepareStatement("DELETE FROM periods WHERE period_id = ?");
         preparedStatement.setInt(1, periodID);
         preparedStatement.execute();
-        PreparedStatement preparedStatementForEvent = connection.prepareStatement("DELETE FROM events WHERE period_id = ?");
+        PreparedStatement preparedStatementForEvent =
+                connection.prepareStatement("DELETE FROM events WHERE period_id = ?");
         preparedStatementForEvent.setInt(1, periodID);
         preparedStatementForEvent.execute();
     }

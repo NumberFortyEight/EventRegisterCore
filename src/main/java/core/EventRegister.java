@@ -1,3 +1,5 @@
+package core;
+
 import entity.Event;
 import entity.Period;
 
@@ -10,6 +12,7 @@ public interface EventRegister {
     /**Вместе с периодом удаляются и все ивенты с id периода*/
     void deletePeriodAndEvents(Integer periodID);
     Boolean isPeriodExist(Integer periodID);
+    List<Period> getPeriodsForAPeriod(Instant startDate, Instant endDate);
     List<Period> getAllPeriods();
 
     Integer addEvent(Integer locationID, Integer periodID);
@@ -18,7 +21,8 @@ public interface EventRegister {
     void changeEventLocation(Integer eventID, Integer locationID);
     Boolean isEventExist(Integer eventID);
     Event getEventByID(Integer eventID);
-    List<Event> getEventsByPeriod(Integer periodID);
+    List<Event> getEventsByPeriodID(Integer periodID);
+    List<Event> getEventsByPeriod(Instant startDate, Instant endDate);
     List<Event> getAllEvents();
 
     @SuppressWarnings("UnusedReturnValue")

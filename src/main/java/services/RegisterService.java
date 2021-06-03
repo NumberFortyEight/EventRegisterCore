@@ -11,6 +11,7 @@ import java.util.List;
 public interface RegisterService {
     Integer addPeriod(Connection connection, Instant startDate, Instant endDate) throws SQLException;
     List<Period> getAllPeriods(Connection connection) throws SQLException;
+    List<Period> getPeriodsForaPeriod(Connection connection, Instant startDate, Instant endDate) throws SQLException;
     void deletePeriodAndEvents(Connection connection, Integer periodID) throws SQLException;
 
     Integer registerEvent(Connection connection, int locationID, int periodID) throws SQLException;

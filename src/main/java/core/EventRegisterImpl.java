@@ -1,7 +1,12 @@
+package core;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import entity.Event;
 import entity.Period;
+import exceptions.EventNotExistException;
+import exceptions.PeriodNotExistException;
+import exceptions.WrongDateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import services.CheckService;
@@ -33,18 +38,10 @@ public class EventRegisterImpl implements EventRegister {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("adding event with locationID: {} and periodID: {}", locationID, periodID);
             if (checkService.isPeriodExist(connection, periodID)) {
-                Integer duplicateEventID = registerService.getEventIDByLocationAndPeriodID(connection, locationID, periodID);
-                if (duplicateEventID == null) {
-                    return registerService.registerEvent(connection, locationID, periodID);
-                } else {
-                    logger.warn("event with periodID {} and locationID {} is a duplicate of event {}",
-                            periodID, locationID, duplicateEventID);
-                    return duplicateEventID;
-                }
-
+                return registerService.registerEvent(connection, locationID, periodID);
             } else {
                 logger.warn("period: {} does not exist.", periodID);
-                return null;
+                throw new PeriodNotExistException("period: " + periodID + " does not exist.");
             }
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
@@ -100,7 +97,7 @@ public class EventRegisterImpl implements EventRegister {
     @Override
     public Event getEventByID(Integer eventID) {
         try (Connection connection = dataSource.getConnection()) {
-            logger.info("getting Event by id: {}", eventID);
+            logger.info("getting event by id: {}", eventID);
             return registerService.getEventByID(connection, eventID);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
@@ -109,7 +106,7 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     @Override
-    public List<Event> getEventsByPeriod(Integer periodID) {
+    public List<Event> getEventsByPeriodID(Integer periodID) {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("getting Events by period: {}", periodID);
             return registerService.getEventsByPeriod(connection, periodID);
@@ -117,6 +114,11 @@ public class EventRegisterImpl implements EventRegister {
             logger.error("Connection error ", sqlException);
             return null;
         }
+    }
+
+    @Override
+    public List<Event> getEventsByPeriod(Instant startDate, Instant endDate) {
+        return null;
     }
 
     @Override
@@ -134,7 +136,7 @@ public class EventRegisterImpl implements EventRegister {
     public Integer addPeriod(Instant startInstant, Instant endInstant) {
         if (startInstant.isAfter(endInstant)) {
             logger.warn("startDate after endDate");
-            return null;
+            throw new WrongDateException("startDate after endDate");
         }
 
         try (Connection connection = dataSource.getConnection()) {
@@ -144,7 +146,7 @@ public class EventRegisterImpl implements EventRegister {
                 logger.warn("duplicate period: ID {}", duplicatePeriodID);
                 return duplicatePeriodID;
             } else {
-                logger.info("Adding period with startInstant {} and endInstant {}", startInstant.toString(), endInstant.toString());
+                logger.info("Adding period with startInstant {} and endInstant {}", startInstant, endInstant);
                 Integer addedPeriodID = registerService.addPeriod(connection, startInstant, endInstant);
                 logger.info("added period have ID {}", addedPeriodID);
                 return addedPeriodID;
@@ -178,6 +180,17 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     @Override
+    public List<Period> getPeriodsForAPeriod(Instant startDate, Instant endDate) {
+        try (Connection connection = dataSource.getConnection()) {
+            logger.info("getting periods by period");
+            return registerService.getPeriodsForaPeriod(connection, startDate, endDate);
+        } catch (SQLException sqlException) {
+            logger.error("Connection error ", sqlException);
+            return null;
+        }
+    }
+
+    @Override
     public void deletePeriodAndEvents(Integer periodID) {
         try (Connection connection = dataSource.getConnection()) {
             logger.info("removing period {} and event(by period id) ", periodID);
@@ -195,7 +208,7 @@ public class EventRegisterImpl implements EventRegister {
                 return registerService.registerUserToEvent(connection, userID, eventID);
             } else {
                 logger.warn("Event not found. ID: " + eventID);
-                return false;
+                throw new EventNotExistException("Event not found. ID: " + eventID);
             }
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
@@ -211,7 +224,7 @@ public class EventRegisterImpl implements EventRegister {
                 return checkService.isUserRegistered(connection, userID, eventID);
             } else {
                 logger.warn("Event not found. ID: " + eventID);
-                return false;
+                throw new EventNotExistException("Event not found. ID: " + eventID);
             }
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);

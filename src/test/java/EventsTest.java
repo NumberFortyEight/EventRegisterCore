@@ -1,3 +1,5 @@
+import core.EventRegister;
+import core.EventRegisterImpl;
 import entity.Event;
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,7 +50,8 @@ public class EventsTest {
                 .anyMatch(event -> event.getEventID().equals(eventID)));
         eventRegister.deletePeriodAndEvents(periodID);
     }
-    @Test
+
+    @Deprecated
     public void duplicateEvent() {
         Instant start = Instant.parse("2018-09-18T00:01:37.907Z");
         Instant end = Instant.parse("2021-10-18T00:02:06.907Z");
@@ -119,7 +122,7 @@ public class EventsTest {
         for (int i = 0; i < 5; i++) {
             eventRegister.addEvent(i, periodID);
         }
-        List<Event> eventsByPeriod = eventRegister.getEventsByPeriod(periodID);
+        List<Event> eventsByPeriod = eventRegister.getEventsByPeriodID(periodID);
         Assert.assertEquals(eventsByPeriod.size(), 5);
         for (int i = 0; i < 5; i++) {
             boolean equals = eventsByPeriod.get(i).getLocationID().equals(i);
