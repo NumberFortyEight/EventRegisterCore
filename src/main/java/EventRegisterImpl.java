@@ -1,5 +1,3 @@
-package core;
-
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import entity.Event;
@@ -134,14 +132,19 @@ public class EventRegisterImpl implements EventRegister {
 
     @Override
     public Integer addPeriod(Instant startInstant, Instant endInstant) {
+        if (startInstant.isAfter(endInstant)) {
+            logger.warn("startDate after endDate");
+            return null;
+        }
+
         try (Connection connection = dataSource.getConnection()) {
-            logger.info("Adding period with startInstant {} and endInstant {}", startInstant.toString(), endInstant.toString());
             Optional<Integer> optionalPeriod = checkService.getOptionalPeriod(connection, startInstant, endInstant);
             if (optionalPeriod.isPresent()) {
                 Integer duplicatePeriodID = optionalPeriod.get();
                 logger.warn("duplicate period: ID {}", duplicatePeriodID);
                 return duplicatePeriodID;
             } else {
+                logger.info("Adding period with startInstant {} and endInstant {}", startInstant.toString(), endInstant.toString());
                 Integer addedPeriodID = registerService.addPeriod(connection, startInstant, endInstant);
                 logger.info("added period have ID {}", addedPeriodID);
                 return addedPeriodID;
@@ -228,36 +231,20 @@ public class EventRegisterImpl implements EventRegister {
     }
 
     @Override
-    public void disableEvent(Integer eventID) {
+    public void setEventActivity(Integer eventID, Boolean activity) {
         try (Connection connection = dataSource.getConnection()) {
-            registerService.setEventActive(connection, eventID, false);
+            logger.info("set event: {} activity: {}", eventID, activity.toString());
+            registerService.setEventActive(connection, eventID, activity);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }
     }
 
     @Override
-    public void disableUser(Integer userID) {
+    public void setUserActivity(Integer userID, Boolean activity) {
         try (Connection connection = dataSource.getConnection()) {
-            registerService.setUserActive(connection, userID, false);
-        } catch (SQLException sqlException) {
-            logger.error("Connection error ", sqlException);
-        }
-    }
-
-    @Override
-    public void activateEvent(Integer eventID) {
-        try (Connection connection = dataSource.getConnection()) {
-            registerService.setEventActive(connection, eventID, true);
-        } catch (SQLException sqlException) {
-            logger.error("Connection error ", sqlException);
-        }
-    }
-
-    @Override
-    public void activateUser(Integer userID) {
-        try (Connection connection = dataSource.getConnection()) {
-            registerService.setUserActive(connection, userID, true);
+            logger.info("set user: {} activity: {}", userID, activity.toString());
+            registerService.setUserActive(connection, userID, activity);
         } catch (SQLException sqlException) {
             logger.error("Connection error ", sqlException);
         }

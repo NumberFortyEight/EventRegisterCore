@@ -1,5 +1,3 @@
-package core;
-
 import entity.Event;
 import entity.Period;
 
@@ -30,10 +28,6 @@ public interface EventRegister {
     /**Зарегистрирован юзер на ивент и может ли он попасть на мероприятие в указанное время (entryTime)*/
     Boolean canUserEnter(Integer userID, Integer EventID, Instant entryTime);
 
-    void activateEvent(Integer eventID);
-    void disableEvent(Integer eventID);
-
-    void activateUser(Integer userID);
-    void disableUser(Integer userID);
-
+    void setEventActivity(Integer eventID, Boolean activity);
+    void setUserActivity(Integer userID, Boolean activity);
 }

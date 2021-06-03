@@ -1,5 +1,3 @@
-import core.EventRegister;
-import core.EventRegisterImpl;
 import entity.Event;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,7 +6,8 @@ import java.time.Instant;
 import java.util.List;
 
 public class EventsTest {
-    private final EventRegister eventRegister = new EventRegisterImpl("src/main/resources/datasource.properties");
+    private final EventRegister eventRegister =
+            new EventRegisterImpl("C:\\Users\\user\\Desktop\\Рабочие папки\\datasource.properties");
 
     @Test
     public void addEvent() {
@@ -127,7 +126,6 @@ public class EventsTest {
             Assert.assertTrue(equals);
         }
         eventRegister.deletePeriodAndEvents(periodID);
-        Assert.assertTrue(eventRegister.getAllEvents().isEmpty());
     }
 
 }

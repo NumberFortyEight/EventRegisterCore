@@ -1,5 +1,3 @@
-import core.EventRegister;
-import core.EventRegisterImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,7 +6,7 @@ import java.time.Instant;
 public class PeriodsTest {
 
     private final EventRegister eventRegister =
-            new EventRegisterImpl("src/main/resources/datasource.properties");
+            new EventRegisterImpl("C:\\Users\\user\\Desktop\\Рабочие папки\\datasource.properties");
 
     @Test
     public void isDuplicatePeriodsHaveOneID(){

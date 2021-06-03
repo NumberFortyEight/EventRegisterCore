@@ -1,5 +1,3 @@
-import core.EventRegister;
-import core.EventRegisterImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,7 +7,8 @@ import java.util.GregorianCalendar;
 
 public class passListTest {
 
-    private final EventRegister eventRegister = new EventRegisterImpl("src/main/resources/datasource.properties");
+    private final EventRegister eventRegister =
+            new EventRegisterImpl("C:\\Users\\user\\Desktop\\Рабочие папки\\datasource.properties");
 
     @Test
     public void passlist(){
@@ -78,18 +77,18 @@ public class passListTest {
 
         Assert.assertTrue(eventRegister.isUserRegistered(userID, eventID));
         Assert.assertTrue(eventRegister.isUserRegistered(userID, secondEventID));
-        eventRegister.disableUser(userID);
+        eventRegister.setUserActivity(userID, false);
         Assert.assertFalse(eventRegister.isUserRegistered(userID, eventID));
         Assert.assertFalse(eventRegister.isUserRegistered(userID, secondEventID));
-        eventRegister.activateUser(userID);
+        eventRegister.setUserActivity(userID, true);
         Assert.assertTrue(eventRegister.isUserRegistered(userID, eventID));
         Assert.assertTrue(eventRegister.isUserRegistered(userID, secondEventID));
-        eventRegister.disableEvent(eventID);
-        eventRegister.disableEvent(secondEventID);
+        eventRegister.setEventActivity(eventID, false);
+        eventRegister.setEventActivity(secondEventID, false);
         Assert.assertFalse(eventRegister.isUserRegistered(userID, eventID));
         Assert.assertFalse(eventRegister.isUserRegistered(userID, secondEventID));
-        eventRegister.activateEvent(eventID);
-        eventRegister.activateEvent(secondEventID);
+        eventRegister.setEventActivity(eventID, true);
+        eventRegister.setEventActivity(secondEventID, true);
         Assert.assertTrue(eventRegister.isUserRegistered(userID, eventID));
         Assert.assertTrue(eventRegister.isUserRegistered(userID, secondEventID));
 
